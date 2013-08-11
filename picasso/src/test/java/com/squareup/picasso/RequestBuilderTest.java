@@ -1,14 +1,25 @@
 package com.squareup.picasso;
 
+import android.R;
+import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.widget.ImageView;
+import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest = Config.NONE)
@@ -167,5 +178,79 @@ public class RequestBuilderTest {
       fail("Null Target should throw exception.");
     } catch (IllegalArgumentException expected) {
     }
+  }
+
+  @Test public void noImageGetDoesNothingAndReturnsNull() throws Exception {
+    final Picasso picasso = mock(Picasso.class);
+
+    final CountDownLatch latch = new CountDownLatch(1);
+    final AtomicReference<Bitmap> result = new AtomicReference<Bitmap>();
+
+    // Calling get() explodes when you call it from the main thread. Spin up a quick BG thread.
+    new Thread(new Runnable() {
+      @Override public void run() {
+        try {
+          result.set(new RequestBuilder(picasso, null, 0).get());
+        } catch (IOException e) {
+          fail(e.getMessage());
+        } finally {
+          latch.countDown();
+        }
+      }
+    }).start();
+    latch.await();
+
+    assertThat(result.get()).isNull();
+    verifyZeroInteractions(picasso);
+  }
+
+  @Test public void noImageFetchTargetDoesNothing() {
+    Picasso picasso = mock(Picasso.class);
+    Target target = mock(Target.class);
+
+    new RequestBuilder(picasso, null, 0).fetch(target);
+
+    verify(picasso).cancelRequest(target);
+    verifyZeroInteractions(target);
+  }
+
+  @Test public void noImageIntoTargetDoesNothing() {
+    Picasso picasso = mock(Picasso.class);
+    Target target = mock(Target.class);
+
+    new RequestBuilder(picasso, null, 0).into(target);
+
+    verify(picasso).cancelRequest(target);
+    verifyZeroInteractions(target);
+  }
+
+  @Test public void noImageDoesNotSubmitRequest() {
+    Picasso picasso = mock(Picasso.class);
+    ImageView target = mock(ImageView.class);
+
+    new RequestBuilder(picasso, null, 0).into(target);
+
+    verify(picasso).cancelRequest(target);
+    verifyZeroInteractions(target);
+  }
+
+  @Test public void noImageWithPlaceholderDoesNotSubmitAndSetsPlaceholder() {
+    Picasso picasso = spy(new Picasso(Robolectric.application, null, null, null, null, null));
+    ImageView target = mock(ImageView.class);
+
+    new RequestBuilder(picasso, null, 0).placeholder(R.drawable.ic_dialog_map).into(target);
+
+    verify(picasso).cancelRequest(target);
+    verify(target).setImageDrawable(any(PicassoDrawable.class));
+  }
+
+  @Test public void noImageWithNullPlaceholderDoesNotSubmitAndClears() {
+    Picasso picasso = mock(Picasso.class);
+    ImageView target = mock(ImageView.class);
+
+    new RequestBuilder(picasso, null, 0).placeholder(null).into(target);
+
+    verify(picasso).cancelRequest(target);
+    verify(target).setImageDrawable(null);
   }
 }
