@@ -6,11 +6,13 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.widget.ImageView;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,9 +22,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
-import static android.content.ContentResolver.SCHEME_CONTENT;
-import static android.content.ContentResolver.SCHEME_FILE;
+import static android.content.ContentResolver.*;
 import static android.provider.ContactsContract.Contacts;
 import static com.squareup.picasso.Loader.Response;
 import static com.squareup.picasso.Utils.calculateInSampleSize;
@@ -402,7 +402,14 @@ public class Picasso {
     return result;
   }
 
-  static Bitmap transformResult(PicassoBitmapOptions options, Bitmap result, int exifRotation) {
+    /** Clean up the memory associated with this Drawable) */
+    public static void recycleBitmap(Drawable d) {
+        if (d != null && d instanceof PicassoDrawable) {
+            ((PicassoDrawable) d).recycleBitmap();
+        }
+    }
+
+    static Bitmap transformResult(PicassoBitmapOptions options, Bitmap result, int exifRotation) {
     int inWidth = result.getWidth();
     int inHeight = result.getHeight();
 

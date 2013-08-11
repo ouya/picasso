@@ -227,6 +227,16 @@ final class PicassoDrawable extends Drawable {
     invalidateSelf();
   }
 
+ /**
+  *  Clean up the memory of the source bitmap.
+  */
+  void recycleBitmap() {
+      if (bitmapDrawable != null) {
+          bitmapDrawable.getBitmap().recycle();
+          bitmapDrawable = null;
+      }
+  }
+
   /**
    * Set the actual bitmap that we should be displaying. If we already have an image and the source
    * of the new image was not the memory cache then perform a cross-fade.
