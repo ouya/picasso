@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.7.+'
+    }
+}
+
+apply plugin: 'android-library'
+
+android {
+    compileSdkVersion 'android-16'
+    buildToolsVersion '19.0.1'
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+        }
+    }
+
+    defaultConfig {
+        targetSdkVersion 16
+        minSdkVersion    16
+
+        versionName '1.0'
+        versionCode 1
+
+        packageName 'com.squareup.picasso'
+    }
+}
+
+dependencies {
+    compile files('libs/okhttp-1.0.2.jar')
+}
