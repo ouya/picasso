@@ -4,10 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import com.squareup.okhttp.HttpResponseCache;
 import com.squareup.okhttp.OkHttpClient;
+
+import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 
 import static com.squareup.picasso.Utils.parseResponseSourceHeader;
 
@@ -66,6 +69,15 @@ public class OkHttpLoader implements Loader {
    */
   public OkHttpLoader(OkHttpClient client) {
     this.client = client;
+
+    SSLContext sslContext;
+    try {
+      sslContext = SSLContext.getInstance("TLS");
+      sslContext.init(null, null, null);
+    } catch (GeneralSecurityException e) {
+      throw new AssertionError(); // The system has no TLS. Just give up.
+    }
+    this.client.setSslSocketFactory(sslContext.getSocketFactory());
   }
 
   @Override public Response load(Uri uri, boolean localCacheOnly) throws IOException {
