@@ -3,15 +3,15 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.android.tools.build:gradle:0.13.+'
     }
 }
 
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 'android-16'
-    buildToolsVersion '19.0.1'
+    buildToolsVersion '21.0.0'
 
     sourceSets {
         main {
@@ -27,7 +27,7 @@ android {
         versionName '1.0'
         versionCode 1
 
-        packageName 'com.squareup.picasso'
+        applicationId 'com.squareup.picasso'
     }
 }
 
